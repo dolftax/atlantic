@@ -22,3 +22,9 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Glide
+vendor
+
+# Binary
+atlantic

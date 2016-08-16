@@ -1,0 +1,4 @@
+package: atlantic
+import:
+- package: github.com/julienschmidt/httprouter
+- package: github.com/spf13/viper
