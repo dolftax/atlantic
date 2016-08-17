@@ -1,10 +1,12 @@
-hash: 34022c180c620d9cc7d283bbefb753969a007025e00f47c88986910b5fed04ad
-updated: 2016-08-16T22:24:52.670184988+05:30
+hash: 2588085a6d22a4de29e4598ec13568a734989125199d8da65f82050007bff7c3
+updated: 2016-08-16T23:10:03.721396017+05:30
 imports:
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
 - name: github.com/fsnotify/fsnotify
   version: f12c6236fe7b5cf6bcf30e5935d08cb079d78334
+- name: github.com/gorilla/handlers
+  version: 801d6e3b008914ee888c9ab9b1b379b9a56fbf44
 - name: github.com/hashicorp/hcl
   version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
   subpackages:
