@@ -9,44 +9,41 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type Config struct {
-	Server struct {
-		port   int
-		logger bool
-	}
-
-	Broker struct {
-		broker            string
-		result_backend    string
-		result_expires_in int
-		exchange          string
-		exchange_type     string
-		default_queue     string
-		binding_key       string
-	}
+type ServerConfig struct {
+	port   string `toml:"port"`
+	logger bool   `toml:"logger"`
 }
 
-func ReadConfig() Config {
-	var configfile = "config.toml"
-	_, err := os.Stat(configfile)
+type BrokerConfig struct {
+	broker        string `toml:"broker"`
+	protocol      string `toml:"protocol"`
+	expiry        int    `toml:"result_expires_in"`
+	exchange_name string `toml:"exchange"`
+	exchange_type string `toml:"exchange_type"`
+	default_queue string `toml:"default_queue"`
+	binding_key   string `toml:"binding_key"`
+}
+
+func init() {
+	_, err := os.Stat("config.toml")
 	if err != nil {
-		log.Fatal("Config file is missing: ", configfile)
+		log.Fatal("Config file is missing: ")
 	}
-
-	var config Config
-	if _, err := toml.DecodeFile(configfile, &config); err != nil {
-		log.Fatal(err)
-	}
-
-	return config
 }
 
 func main() {
-	var config = ReadConfig()
+	// Server config parsing
+	var serverConfig ServerConfig
+	_, err := toml.DecodeFile("config.toml", &serverConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Router
 	router := httprouter.New()
 	router.GET("/*path", queuePass)
 
-	log.Println("Atlantic server listening at port"+":", config.server.port)
+	log.Println("Atlantic server listening at port", serverConfig.port)
 
-	log.Fatal(http.ListenAndServe(":"+config.server.port, middleware(router)))
+	log.Fatal(http.ListenAndServe(":"+serverConfig.port, middleware(router, serverConfig)))
 }

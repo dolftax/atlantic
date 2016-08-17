@@ -5,12 +5,11 @@ import (
 	"os"
 
 	"github.com/gorilla/handlers"
-	"github.com/spf13/viper"
 )
 
-func middleware(router http.Handler) http.Handler {
+func middleware(router http.Handler, serverConfig serverConfig) http.Handler {
 	// Logger
-	if (viper.GetBool("logger")) == true {
+	if serverConfig.logger == true {
 		return handlers.CombinedLoggingHandler(os.Stdout, router)
 	}
 	return router
