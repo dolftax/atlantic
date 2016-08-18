@@ -14,16 +14,6 @@ type ServerConfig struct {
 	logger bool   `toml:"logger"`
 }
 
-type BrokerConfig struct {
-	broker        string `toml:"broker"`
-	protocol      string `toml:"protocol"`
-	expiry        int    `toml:"result_expires_in"`
-	exchange_name string `toml:"exchange"`
-	exchange_type string `toml:"exchange_type"`
-	default_queue string `toml:"default_queue"`
-	binding_key   string `toml:"binding_key"`
-}
-
 func init() {
 	_, err := os.Stat("config.toml")
 	if err != nil {
@@ -41,7 +31,7 @@ func main() {
 
 	// Router
 	router := httprouter.New()
-	router.GET("/*path", queuePass)
+	router.GET("/*path", analyser)
 
 	log.Println("Atlantic server listening at port", serverConfig.port)
 

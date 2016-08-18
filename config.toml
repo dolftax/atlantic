@@ -1,12 +1,3 @@
 [server]
 port = 9000
 logger = true
-
-[broker]
-broker = "amqp://guest:guest@localhost:5672/"
-protocol = "amqp"
-results_expire_in = 3600000
-exchange_name = "atlantic"
-exchange_type = "direct"
-default_queue = "code_analysis"
-binding_key = "code_analysis"
