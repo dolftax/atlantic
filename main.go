@@ -31,7 +31,7 @@ func main() {
 
 	// Router
 	router := httprouter.New()
-	router.GET("/*path", checkConfig)
+	// TODO: Point to routing function when it is up // router.GET("/*path", )
 
 	log.Println("Atlantic server listening at port", serverConfig.port)
 
