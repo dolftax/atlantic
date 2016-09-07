@@ -28,3 +28,6 @@ vendor
 
 # Binary
 atlantic
+
+# Webapp
+webapp/bower_components/

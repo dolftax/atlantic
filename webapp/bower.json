@@ -1,0 +1,26 @@
+{
+  "name": "atlantic",
+  "homepage": "https://github.com/dolftax/atlantic",
+  "description": "Manage and monitor containers",
+  "main": "index.js",
+  "moduleType": [],
+  "keywords": [
+    "docker",
+    "rkt",
+    "containers"
+  ],
+  "authors": [
+    "Jaipradeesh <jaipradeesh@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "^15.3.1"
+  }
+}
