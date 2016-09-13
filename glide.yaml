@@ -1,3 +1,2 @@
 package: atlantic
 import:
-- package: github.com/julienschmidt/httprouter

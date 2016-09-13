@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/websocket"
 )
 
 type ServerConfig struct {
@@ -17,7 +17,7 @@ type ServerConfig struct {
 func init() {
 	_, err := os.Stat("config.toml")
 	if err != nil {
-		log.Fatal("Config file is missing: ")
+		log.Fatal("Config file is missing")
 	}
 }
 
@@ -29,11 +29,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Router
-	router := httprouter.New()
-	// TODO: Point to routing function when it is up // router.GET("/*path", )
+	http.Handle('/', func(w http.ResponseWriter, r *http.Request) {
 
+		var upgrader = websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		}
+
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		// TODO: Pass on the connection to handler
+	})
+	
 	log.Println("Atlantic server listening at port", serverConfig.port)
-
 	log.Fatal(http.ListenAndServe(":"+serverConfig.port, middleware(router, serverConfig)))
 }
