@@ -7,11 +7,12 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/gorilla/websocket"
+	"github.com/julienschmidt/httprouter"
 )
 
 type ServerConfig struct {
-	port   string `toml:"port"`
-	logger bool   `toml:"logger"`
+	Port   string `toml:"port"`
+	Logger bool   `toml:"logger"`
 }
 
 func init() {
@@ -19,6 +20,21 @@ func init() {
 	if err != nil {
 		log.Fatal("Config file is missing")
 	}
+}
+
+func upgrade_ws(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(conn)
+
 }
 
 func main() {
@@ -29,20 +45,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.Handle('/', func(w http.ResponseWriter, r *http.Request) {
+	router := httprouter.New()
 
-		var upgrader = websocket.Upgrader{
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-		}
+	// Establish websocket connection and serve the webapp
+	router.GET("/", upgrade_ws)
 
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Println(err)
-		}
-		// TODO: Pass on the connection to handler
-	})
-	
-	log.Println("Atlantic server listening at port", serverConfig.port)
-	log.Fatal(http.ListenAndServe(":"+serverConfig.port, middleware(router, serverConfig)))
+	log.Println("Atlantic server listening at port", serverConfig.Port)
+	log.Fatal(http.ListenAndServe(":"+serverConfig.Port, middleware(router, serverConfig)))
 }

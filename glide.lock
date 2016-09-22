@@ -1,4 +1,10 @@
-hash: 4b1de56bf9e675a344bfa96db6c8b50508d75a67fab67f7121131190e6d15e93
-updated: 2016-09-14T02:19:59.62119171+05:30
-imports: []
+hash: 772904102717b43c07e80241477598d8c7322eeee3f985984ee45feb95810664
+updated: 2016-09-15T20:09:08.70597559+05:30
+imports:
+- name: github.com/BurntSushi/toml
+  version: 99064174e013895bbd9b025c31100bd1d9b590ca
+- name: github.com/gorilla/handlers
+  version: 801d6e3b008914ee888c9ab9b1b379b9a56fbf44
+- name: github.com/gorilla/websocket
+  version: 2d1e4548da234d9cb742cc3628556fef86aafbac
 devImports: []

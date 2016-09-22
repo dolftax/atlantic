@@ -7,9 +7,9 @@ import (
 	"github.com/gorilla/handlers"
 )
 
-func middleware(router http.Handler, serverConfig serverConfig) http.Handler {
+func middleware(router http.Handler, serverConfig ServerConfig) http.Handler {
 	// Logger
-	if serverConfig.logger == true {
+	if serverConfig.Logger == true {
 		return handlers.CombinedLoggingHandler(os.Stdout, router)
 	}
 	return router
