@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"os"
 
@@ -22,19 +23,26 @@ func init() {
 	}
 }
 
-func upgrade_ws(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func upgrade_conn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn_ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
-	}
-	log.Println(conn)
+	} else {
+		// Establish connection with docker daemon
+		conn_docker, err := net.Dial("unix", "/var/run/docker.sock")
+		if err != nil {
+			log.Fatal(err)
+		}
 
+		// Pass connection object to message handler
+		frame_handler(conn_ws, &conn_docker)
+	}
 }
 
 func main() {
@@ -48,7 +56,7 @@ func main() {
 	router := httprouter.New()
 
 	// Establish websocket connection and serve the webapp
-	router.GET("/", upgrade_ws)
+	router.GET("/", upgrade_conn)
 
 	log.Println("Atlantic server listening at port", serverConfig.Port)
 	log.Fatal(http.ListenAndServe(":"+serverConfig.Port, middleware(router, serverConfig)))
