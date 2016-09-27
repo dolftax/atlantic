@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 	"net/http"
@@ -16,15 +17,26 @@ type ServerConfig struct {
 	Logger bool   `toml:"logger"`
 }
 
+// type RequestObj struct {
+// 	Engine    string
+// 	Command   string
+// 	Arguments []string
+// }
+
+// Docker connection object
+var conn_docker net.Conn
+
 func init() {
+	// Check if config file exists
 	_, err := os.Stat("config.toml")
 	if err != nil {
-		log.Fatal("Config file is missing")
+		log.Fatal("Config file is missing", err)
 	}
 }
 
 func upgrade_conn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
+	// Define buffer size
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -32,48 +44,41 @@ func upgrade_conn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	conn_ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error upgrading connection", err)
 	} else {
 		// Establish connection with docker daemon
-		_, err := net.Dial("unix", "/var/run/docker.sock")
+		conn_docker, err := net.Dial("unix", "/var/run/docker.sock")
+		log.Println(conn_docker)
 		if err != nil {
-			log.Fatal(err)
+			// TODO: Make this optional. If unable to establish connection, request of engine type `docker` should be errored.
+			log.Fatal("Error establishing connection with docker", err)
 		}
 
-		// Listen for message frames
+		// Listen for websocket message frames
 		for {
-			message_type, message, err := conn_ws.ReadMessage()
+			_, request_frame, err := conn_ws.ReadMessage() // Frame type ignored
 			if err != nil {
-				// TODO: Pass it onto error handler
-				log.Println(err)
-				break
+				log.Println("Error reading message frame", err)
 			}
 
-			// Validate and parse message frame
-			buffer := new(bytes.Buffer)
-			buffer.ReadFrom(message)
-			requestData := buffer.Bytes()
-
-			if len(requestData) == 0 {
-				// TOOD: Pass it onto error handler
+			if len(request_frame) == 0 {
+				error_handler(conn_ws, "connection upgrade", 1000, "")
 			} else {
-				bodyParser(requestData, r, w, path)
+				var request_obj map[string]string
+				err := json.Unmarshal(request_frame, &request_obj)
+				if err != nil {
+					error_handler(conn_ws, "error parsing request JSON", 1001, "")
+				}
+
+				// Frame handler will take websocket connection and request object and takes ownership from here
+				go frame_handler(conn_ws, request_obj)
 			}
-
-			go frame_handler()
-
-			// err = conn_ws.WriteMessage(message_type, message)
-			// if err != nil {
-			// 	// TODO: Pass it onto error handler
-			// 	log.Println(err)
-			// 	break
-			// }
 		}
 	}
 }
 
 func main() {
-	// Server config parsing
+	// Parse server configuration from `config.toml` file
 	var serverConfig ServerConfig
 	_, err := toml.DecodeFile("config.toml", &serverConfig)
 	if err != nil {
@@ -82,7 +87,7 @@ func main() {
 
 	router := httprouter.New()
 
-	// Establish websocket connection and serve the webapp
+	// Establish websocket connection and serve the web application
 	router.GET("/", upgrade_conn)
 
 	log.Println("Atlantic server listening at port", serverConfig.Port)

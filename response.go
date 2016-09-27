@@ -2,39 +2,40 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
+	"github.com/gorilla/websocket"
+	"log"
 	"time"
 )
 
 type ResponseObj struct {
-	Err       int         `json:error`
-	Timestamp time.Time   `json:timestamp`
-	Path      string      `json:path`
-	Result    interface{} `json:result`
+	Operation string
+	Err       int
+	Timestamp time.Time
+	Result    string
 }
 
-func responseDispatcher(w http.ResponseWriter, r *http.Request, message ResponseObj, isErr bool) {
-	response, err := json.Marshal(message)
+func response_dispatcher(conn_ws *websocket.Conn, response_obj ResponseObj) {
+	response, err := json.Marshal(response_obj)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error mashaling response_obj JSON")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if isErr == true {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
+	err = conn_ws.WriteJSON(response)
+	if err != nil {
+		log.Println("Error sending response JSON as frame")
+		return
 	}
-	w.Write(response)
+	conn_ws.Close()
 }
 
-func responseHandler(w http.ResponseWriter, r *http.Request, path string, result interface{}) {
-	message := ResponseObj{0, time.Now(), path, result}
-	responseDispatcher(w, r, message, false)
+func response_handler(conn_ws *websocket.Conn, operation string, result string) {
+	response_obj := ResponseObj{operation, 0, time.Now(), result}
+	response_dispatcher(conn_ws, response_obj)
 }
 
-func errorHandler(w http.ResponseWriter, r *http.Request, path string, err int) {
-	message := ResponseObj{err, time.Now(), path, ""}
-	responseDispatcher(w, r, message, true)
+func error_handler(conn_ws *websocket.Conn, operation string, err int, result string) {
+
+	response_obj := ResponseObj{operation, err, time.Now(), result}
+	response_dispatcher(conn_ws, response_obj)
 }
