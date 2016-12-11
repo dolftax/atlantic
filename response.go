@@ -21,12 +21,11 @@ func response_dispatcher(conn_ws *websocket.Conn, response_obj ResponseObj) {
 		return
 	}
 
-	err = conn_ws.WriteJSON(response)
+	err = conn_ws.WriteMessage(response)
 	if err != nil {
 		log.Println("Error sending response JSON as frame")
 		return
 	}
-	conn_ws.Close()
 }
 
 func response_handler(conn_ws *websocket.Conn, operation string, result string) {

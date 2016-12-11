@@ -17,12 +17,6 @@ type ServerConfig struct {
 	Logger bool   `toml:"logger"`
 }
 
-// type RequestObj struct {
-// 	Engine    string
-// 	Command   string
-// 	Arguments []string
-// }
-
 // Docker connection object
 var conn_docker net.Conn
 
@@ -56,13 +50,13 @@ func upgrade_conn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 		// Listen for websocket message frames
 		for {
-			_, request_frame, err := conn_ws.ReadMessage() // Frame type ignored
+			message_type, request_frame, err := conn_ws.ReadMessage() // Frame type ignored
 			if err != nil {
 				log.Println("Error reading message frame", err)
 			}
 
 			if len(request_frame) == 0 {
-				error_handler(conn_ws, "connection upgrade", 1000, "")
+				error_handler(conn_ws, messa "connection upgrade", 1000, "")
 			} else {
 				var request_obj map[string]string
 				err := json.Unmarshal(request_frame, &request_obj)
